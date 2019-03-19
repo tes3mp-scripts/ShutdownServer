@@ -4,12 +4,13 @@ ShutdownServer.scriptName = "ShutdownServer"
 
 ShutdownServer.defaultConfig = {
     commandName= "shutdown",
-    announcePrefix = "#FF0000[Server]: Server shutting down in ",
-    announceSuffix = " minutes!\n",
+    announceMessage = "#FF0000[Server]: Server shutting down in %s minutes!\n",
     timeUnit = 60,
     announcePeriods = {0.5, 1, 2 , 3 , 4, 5},
     shutdownDelay = 5,
-    requiredRank = 2
+    requiredRank = 2,
+    scheduledShutdownEnabled = false,
+    scheduledShutdownTime = 6*60
 }
 
 ShutdownServer.config = DataManager.loadConfiguration(ShutdownServer.scriptName, ShutdownServer.defaultConfig)
@@ -38,7 +39,7 @@ function ShutdownServerAnnounce(time)
     for pid, player in pairs(Players) do
         tes3mp.SendMessage(
             pid,
-            ShutdownServer.config.announcePrefix .. time .. ShutdownServer.config.announceSuffix
+            string.format(ShutdownServer.config.announceMessage, time)
         )
     end
 end
@@ -64,6 +65,16 @@ function ShutdownServer.setupTimers(shutdownDelay)
 
     ShutdownServerAnnounce(shutdownDelay)
 end
+
+
+function ShutdownServer.OnServerPostInit()
+    if ShutdownServer.config.scheduledShutdownEnabled then
+        ShutdownServer.setupTimers(ShutdownServer.config.scheduledShutdownTime * ShutdownServer.config.timeUnit)
+    end
+end
+
+customEventHooks.registerHandler("OnServerPostInit", ShutdownServer.OnServerPostInit)
+
 
 function ShutdownServer.processCommand(pid, cmd)
     if Players[pid].data.settings.staffRank >= ShutdownServer.config.requiredRank then
