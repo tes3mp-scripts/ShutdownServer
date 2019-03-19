@@ -1,4 +1,4 @@
-Allows you to exit the server in orderly fashion, while triggering the `OnServerExit` event (important for most my scripts).
+Allows you to exit the server in orderly fashion, while triggering the `OnServerExit` event (important for most of my scripts).
 
 Simply use `/shutdown` (configurable) to exit the server.
 
