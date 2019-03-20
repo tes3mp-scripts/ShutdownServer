@@ -1,5 +1,7 @@
 Allows you to exit the server in orderly fashion, while triggering the `OnServerExit` event (important for most of my scripts).
 
+Requires [DataManager](https://github.com/tes3mp-scripts/DataManager)!
+
 Simply use `/shutdown` (configurable) to exit the server.
 
 You can find the configuration file in `server/data/custom/__config_ShutdownServer.json`.
