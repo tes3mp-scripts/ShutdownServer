@@ -15,22 +15,7 @@ ShutdownServer.defaultConfig = {
 
 ShutdownServer.config = DataManager.loadConfiguration(ShutdownServer.scriptName, ShutdownServer.defaultConfig)
 
-function ShutdownServer.kickEveryone()
-    for pid, player in pairs(Players) do
-        player:Save()
-        tes3mp.Kick(pid)
-    end
-end
-
-function ShutdownServer.unloadCells()
-    for cellDescription, cell in pairs(LoadedCells) do
-        logicHandler.UnloadCell(cellDescription)
-    end
-end
-
 function ShutdownServerStopServer()
-    ShutdownServer.kickEveryone()
-    ShutdownServer.unloadCells()
     tes3mp.StopServer(0)
 end
 
@@ -66,6 +51,25 @@ function ShutdownServer.setupTimers(shutdownDelay)
     ShutdownServerAnnounce(shutdownDelay)
 end
 
+function ShutdownServer.savePlayers()
+    for pid, player in pairs(Players) do
+        player:Save()
+        tes3mp.Kick(pid)
+    end
+end
+
+function ShutdownServer.saveCells()
+    for cellDescription, cell in pairs(LoadedCells) do
+        cell:Save()
+    end
+end
+
+function ShutdownServer.saveRecordStores()
+    for _, recordStore in RecordStores do
+        recordStore:Save()
+    end
+end
+
 
 function ShutdownServer.OnServerPostInit()
     if ShutdownServer.config.scheduledShutdownEnabled then
@@ -73,7 +77,16 @@ function ShutdownServer.OnServerPostInit()
     end
 end
 
+function ShutdownServer.OnServerExit()
+    ShutdownServer.savePlayers()
+    ShutdownServer.saveCells()
+    ShutdownServer.saveRecordStores()
+    World:Save()
+end
+
+
 customEventHooks.registerHandler("OnServerPostInit", ShutdownServer.OnServerPostInit)
+customEventHooks.registerHandler("OnServerExit", ShutdownServer.OnServerExit)
 
 
 function ShutdownServer.processCommand(pid, cmd)

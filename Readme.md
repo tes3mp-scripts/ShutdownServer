@@ -1,4 +1,4 @@
-Allows you to exit the server in orderly fashion, while triggering the `OnServerExit` event (important for most of my scripts).
+Allows you to exit the server in orderly fashion, while triggering the `OnServerExit` event (important for most of my scripts). Also makes sure to save all the data in case `OnServerExit` is triggered by a lua crash.
 
 Requires [DataManager](https://github.com/tes3mp-scripts/DataManager)!
 
