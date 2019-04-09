@@ -65,7 +65,7 @@ function ShutdownServer.saveCells()
 end
 
 function ShutdownServer.saveRecordStores()
-    for _, recordStore in RecordStores do
+    for _, recordStore in pairs(RecordStores) do
         recordStore:Save()
     end
 end
