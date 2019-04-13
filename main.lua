@@ -53,6 +53,7 @@ end
 
 function ShutdownServer.savePlayers()
     for pid, player in pairs(Players) do
+        player:SaveStatsDynamic()
         player:DeleteSummons()
         player:Save()
         tes3mp.Kick(pid)
