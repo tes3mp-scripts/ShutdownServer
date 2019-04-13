@@ -16,19 +16,7 @@ ShutdownServer.defaultConfig = {
 ShutdownServer.config = DataManager.loadConfiguration(ShutdownServer.scriptName, ShutdownServer.defaultConfig)
 
 function ShutdownServerStopServer(stage)
-    if stage == 0 then
-        for pid, player in pairs(Players) do
-            tes3mp.Kick(pid)
-        end
-        tes3mp.StartTimer(tes3mp.CreateTimerEx(
-            "ShutdownServerStopServer",
-            1000,
-            "i",
-            1
-        ))
-    else
-        tes3mp.StopServer(0)
-    end
+    tes3mp.StopServer(0)
 end
 
 function ShutdownServerAnnounce(time)
@@ -55,11 +43,9 @@ function ShutdownServer.setupTimers(shutdownDelay)
         end
     end
     
-    tes3mp.StartTimer(tes3mp.CreateTimerEx(
+    tes3mp.StartTimer(tes3mp.CreateTimer(
         "ShutdownServerStopServer",
-        1000 * (shutdownDelay),
-        "i",
-        0
+        1000 * (shutdownDelay)
     ))
 
     ShutdownServerAnnounce(shutdownDelay)
@@ -67,6 +53,7 @@ end
 
 function ShutdownServer.savePlayers()
     for pid, player in pairs(Players) do
+        player:DeleteSummons()
         player:Save()
         tes3mp.Kick(pid)
     end
@@ -74,7 +61,8 @@ end
 
 function ShutdownServer.saveCells()
     for cellDescription, cell in pairs(LoadedCells) do
-        --cell:Save()
+        cell:SaveActorPositions()
+        cell:SaveActorStatsDynamic()
         logicHandler.UnloadCell(cellDescription)
     end
 end
