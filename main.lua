@@ -53,10 +53,7 @@ end
 
 function ShutdownServer.savePlayers()
     for pid, player in pairs(Players) do
-        player:SaveStatsDynamic()
-        player:DeleteSummons()
-        player:Save()
-        tes3mp.Kick(pid)
+        player:SaveToDrive()
     end
 end
 
@@ -64,12 +61,12 @@ function ShutdownServer.saveCells()
     for cellDescription, cell in pairs(LoadedCells) do
         cell:SaveActorPositions()
         cell:SaveActorStatsDynamic()
-        logicHandler.UnloadCell(cellDescription)
+        cell:SaveToDrive()
     end
 end
 
 function ShutdownServer.saveRecordStores()
-    for _, recordStore in pairs(RecordStores) do
+    for storeType, recordStore in pairs(RecordStores) do
         recordStore:Save()
     end
 end
@@ -81,16 +78,38 @@ function ShutdownServer.OnServerPostInit()
     end
 end
 
-function ShutdownServer.OnServerExit()
-    ShutdownServer.savePlayers()
-    ShutdownServer.saveCells()
-    ShutdownServer.saveRecordStores()
-    World:Save()
+function ShutdownServer.SaveEverything()
+    pcall(function()
+        ShutdownServer.savePlayers()
+    end)
+    pcall(function()
+        ShutdownServer.saveCells()
+    end)
+    pcall(function()
+        ShutdownServer.saveRecordStores()
+    end)
+    pcall(function()
+        World:Save()
+    end)
+end
+
+function ShutdownServer.CleanUp()
+    for pid, player in pairs(Players) do
+        player:SaveStatsDynamic()
+        player:DeleteSummons()
+        tes3mp.Kick(pid)
+    end
 end
 
 
 customEventHooks.registerHandler("OnServerPostInit", ShutdownServer.OnServerPostInit)
-customEventHooks.registerHandler("OnServerExit", ShutdownServer.OnServerExit)
+customEventHooks.registerHandler("OnServerExit", ShutdownServer.SaveEverything)
+customEventHooks.registerHandler("OnServerExit", function()
+    pcall(function()
+        ShutdownServer.CleanUp()
+    end)
+    ShutdownServer.SaveEverything()
+end)
 
 
 function ShutdownServer.processCommand(pid, cmd)
