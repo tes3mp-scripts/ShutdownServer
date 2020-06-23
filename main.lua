@@ -53,14 +53,14 @@ end
 
 function ShutdownServer.savePlayers()
     for pid, player in pairs(Players) do
+        player:SaveStatsDynamic()
+        player:SaveCell()
         player:SaveToDrive()
     end
 end
 
 function ShutdownServer.saveCells()
     for cellDescription, cell in pairs(LoadedCells) do
-        cell:SaveActorPositions()
-        cell:SaveActorStatsDynamic()
         cell:SaveToDrive()
     end
 end
