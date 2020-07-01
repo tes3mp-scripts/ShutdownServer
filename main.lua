@@ -30,7 +30,6 @@ function ShutdownServerAnnounce(time)
 end
 
 function ShutdownServer.setupTimers(shutdownDelay)
-    
     for i, time in pairs(ShutdownServer.config.announcePeriods) do
         time = time * ShutdownServer.config.timeUnit
         if time < shutdownDelay then
@@ -53,8 +52,6 @@ end
 
 function ShutdownServer.savePlayers()
     for pid, player in pairs(Players) do
-        player:SaveStatsDynamic()
-        player:SaveCell()
         player:SaveToDrive()
     end
 end
@@ -78,36 +75,46 @@ function ShutdownServer.OnServerPostInit()
     end
 end
 
-function ShutdownServer.SaveEverything()
-    pcall(function()
-        ShutdownServer.savePlayers()
-    end)
-    pcall(function()
-        ShutdownServer.saveCells()
-    end)
-    pcall(function()
-        ShutdownServer.saveRecordStores()
-    end)
-    pcall(function()
-        World:Save()
-    end)
-end
-
-function ShutdownServer.CleanUp()
-    for pid, player in pairs(Players) do
-        player:SaveStatsDynamic()
-        player:DeleteSummons()
-        tes3mp.Kick(pid)
+local errorLog = function(status, err)
+    if not status then
+        tes3mp.LogMessage(enumerations.log.ERROR, "[ShutdownServer]" .. err)
     end
 end
 
+function ShutdownServer.KickPlayers()
+    errorLog(pcall(function()
+        for pid, player in pairs(Players) do
+            if player:IsLoggedIn() then
+                player:SaveStatsDynamic()
+                player:SaveCell()
+                player:DeleteSummons()
+            end
+            tes3mp.Kick(pid)
+        end
+    end))
+end
 
+function ShutdownServer.SaveEverything()
+    errorLog(pcall(function()
+        ShutdownServer.savePlayers()
+    end))
+    errorLog(pcall(function()
+        ShutdownServer.saveCells()
+    end))
+    errorLog(pcall(function()
+        ShutdownServer.saveRecordStores()
+    end))
+    errorLog(pcall(function()
+        World:Save()
+    end))
+end
+
+local saveOnce = true
 customEventHooks.registerHandler("OnServerPostInit", ShutdownServer.OnServerPostInit)
-customEventHooks.registerHandler("OnServerExit", ShutdownServer.SaveEverything)
 customEventHooks.registerHandler("OnServerExit", function()
-    pcall(function()
-        ShutdownServer.CleanUp()
-    end)
+    if not saveOnce then return end
+    saveOnce = false
+    ShutdownServer.KickPlayers()
     ShutdownServer.SaveEverything()
 end)
 
