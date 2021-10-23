@@ -116,7 +116,11 @@ function ShutdownServer.processCommand(pid, cmd)
     if Players[pid].data.settings.staffRank >= ShutdownServer.config.requiredRank then
         local shutdownDelay = ShutdownServer.config.shutdownDelay
         if cmd[2] ~= nil then
-            shutdownDelay = tonumber(cmd[2])
+            if cmd[2] == "now" then
+                shutdownDelay = 0
+            else 
+                shutdownDelay = tonumber(cmd[2])
+            end
         end
         shutdownDelay = shutdownDelay * ShutdownServer.config.timeUnit
 
